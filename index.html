@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			html,body{
+				margin: 0 0;
+				padding: 0 0;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="600" height="600"></canvas>
+		<!--加载高清屏canvas绘制-->
+		<script src="js/hidpi-canvas.js" type="text/javascript" charset="utf-8"></script>
+
+		<script type="text/javascript">
+			var canvas = document.getElementById("canvas");
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			var ctx = canvas.getContext("2d");
+			ctx.strokeStyle = "black";
+
+			/*初始化参数配置*/
+			var step = 10;//方块尺寸
+			var origin_squre = {
+				x: window.innerWidth / 2,
+				y: window.innerHeight / 2 - 150 / 2
+			}
+			var shaow_height = 150;//阴影距离方块高度
+			
+
+			/*方块位置信息，携带编号*/
+			var squre1 = {
+					x : 100,
+					y : 50,
+					increase : step,
+					num : 1
+				}
+			var squre2 = {
+					x : 120,
+					y : 60,
+					increase : step,
+					num : 2
+				}
+			var squre3 = {
+					x : 80,
+					y : 60,
+					increase : step,
+					num : 3
+				}
+			var squre4 = {
+					x : 60,
+					y : 50,
+					increase : step,
+					num : 4
+				}
+			
+			
+			/*初始化方块位置信息*/
+			function init_squre(x,y){
+				squre1.x = x;
+				squre1.y = y;
+				
+				squre2.x = x + step * 2;
+				squre2.y = y + step;
+				
+				squre3.x = x - step * 2;
+				squre3.y = y + step;
+				
+				squre4.x = x - step * 4;
+				squre4.y = y;
+			}
+			
+			init_squre(origin_squre.x,origin_squre.y);
+			
+			/*初次绘制方块*/
+			draw_squre(squre4);
+			draw_squre(squre1);
+			draw_squre(squre2);
+			draw_squre(squre3);
+			
+			
+			/*阴影位置信息*/
+			var shaow_begin = [
+				{
+					x : squre1.x,
+					y : squre1.y + shaow_height,
+					increase : squre1.increase
+				},
+				{
+					x : squre2.x,
+					y : squre2.y + shaow_height,
+					increase : squre2.increase
+				},{
+					x : squre3.x,
+					y : squre3.y + shaow_height,
+					increase : squre3.increase
+				},{
+					x : squre4.x,
+					y : squre4.y + shaow_height,
+					increase : squre4.increase
+				}
+			];
+			
+			/*重置阴影位置信息，依赖方块位置*/
+			function get_shaow_pos(){
+				shaow_begin = [
+					{
+						x : squre1.x,
+						y : squre1.y + shaow_height,
+						increase : squre1.increase
+					},
+					{
+						x : squre2.x,
+						y : squre2.y + shaow_height,
+						increase : squre2.increase
+					},{
+						x : squre3.x,
+						y : squre3.y + shaow_height,
+						increase : squre3.increase
+					},{
+						x : squre4.x,
+						y : squre4.y + shaow_height,
+						increase : squre4.increase
+					}
+				];
+			}
+			
+			/*绘制一个方块的阴影*/
+			function draw_shaow(x,y,increase){
+				if(typeof x === "object"){
+					y = x.y;
+					increase = x.increase;
+					x = x.x;
+				}
+				ctx.fillStyle = "#e9e5dd"
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x +increase * 2,y + increase);
+				ctx.lineTo(x,y + increase * 2);
+				ctx.lineTo(x - increase * 2,y + increase);
+				ctx.closePath();
+				ctx.fill();
+			}
+			
+			/*绘制所有阴影*/
+			for(var i in shaow_begin){
+				draw_shaow(shaow_begin[i]);
+			}
+
+			/*绘制一个方块*/
+			function draw_squre(x,y,increase,num){
+				if(typeof x === "object"){
+					y = x.y;
+					increase = x.increase;
+					num = x.num;
+					x = x.x;
+				}
+				ctx.fillStyle = "#fffce6"
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x +increase * 2,y + increase);
+				ctx.lineTo(x,y + increase * 2);
+				ctx.lineTo(x - increase * 2,y + increase);
+				ctx.closePath();
+				ctx.fill();
+				
+				/*测试使用标示方块*/
+//				ctx.font = "10px";
+//				ctx.fillStyle = "black";
+//				ctx.fillText(num,x,y + 10);
+				
+				ctx.fillStyle = "#faeba0"
+				ctx.beginPath();
+				ctx.moveTo(x,y + increase * 2);
+				ctx.lineTo(x + increase * 2,y + increase);
+				ctx.lineTo(x + increase * 2,y + increase * 3);
+				ctx.lineTo(x ,y + increase * 4);
+				ctx.closePath();
+				ctx.fill();
+				
+				ctx.fillStyle = "#f0db70"
+				ctx.beginPath();
+				ctx.moveTo(x - increase * 2,y + increase);
+				ctx.lineTo(x,y + increase * 2);
+				ctx.lineTo(x ,y + increase * 4);
+				ctx.lineTo(x - increase * 2,y + increase * 3);
+				ctx.closePath();
+				ctx.fill();
+			}
+			
+			var for_index = 1;//记录当前执行动画的序列
+			
+			/*分析动画，其实动画只有两次的执行*/
+			var interval = setInterval(function(){
+
+				if(for_index == 1){
+					if(squre4.x == origin_squre.x - step * 2){
+						for_index = 2;
+					}else{
+						squre2.x -= 2;
+						squre2.y += 1;
+						
+						squre4.x += 2;
+						squre4.y -= 1;
+					}
+				}else if(for_index == 2){
+					if(squre4.x == origin_squre.x){
+						for_index = 1;
+						
+						/*重置方块位置信息到初始值*/
+						init_squre(origin_squre.x,origin_squre.y);
+						
+					}else{
+						squre3.x -= 2;
+						squre3.y -= 1;
+						
+						squre2.x -= 2;
+						squre2.y -= 1;
+						
+						squre4.x += 2;
+						squre4.y += 1;
+						
+						squre1.x += 2;
+						squre1.y += 1;
+					}
+
+				}
+
+				ctx.clearRect(0,0,canvas.width,canvas.height);
+				/*重绘方块*/
+				if(for_index == 1 || for_index == 2){
+					draw_squre(squre4);
+					draw_squre(squre1);
+					draw_squre(squre3);
+					draw_squre(squre2);
+				}
+				
+				/*重绘阴影*/
+				get_shaow_pos();
+				for(var i in shaow_begin){
+					draw_shaow(shaow_begin[i]);
+				}
+
+			},1000 / 24);
+		</script>
+	</body>
+</html>
